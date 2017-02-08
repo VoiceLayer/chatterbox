@@ -570,6 +570,10 @@ route_frame({#frame_header{type=?HEADERS}=FH, _Payload}=Frame,
             #connection{}=Conn) ->
     StreamId = FH#frame_header.stream_id,
     Streams = Conn#connection.streams,
+    Stream = h2_stream_set:get(StreamId, Streams),
+    NotifyPid = h2_stream_set:notify_pid(Stream),
+
+    NotifyPid ! {'END_HEADERS', StreamId},
 
     lager:debug("[~p] Received HEADERS Frame for Stream ~p",
                 [Conn#connection.type, StreamId]),
